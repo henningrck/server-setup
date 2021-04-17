@@ -60,6 +60,23 @@ function install_mailcow() {
     echo "Password: moohoo"
 }
 
+function mount_storagebox() {
+    username=$(ask "Storage Box username")
+    password=$(ask "Storage Box password")
+    uid=$(ask "Mount as UID" "root")
+    gid=$(ask "Mount as GID" "root")
+
+    apt-get install -y cifs-utils
+
+    echo "username=$username" >> /etc/storagebox-$username.txt
+    echo "password=$password" >> /etc/storagebox-$username.txt
+    chmod 600 /etc/storagebox-$username.txt
+
+    echo "//$username.your-storagebox.de/backup /storagebox-$username iocharset=utf8,rw,credentials=/etc/storagebox-$username.txt,uid=$uid,gid=$gid,file_mode=0660,dir_mode=0770 0 0" >> /etc/fstab
+    mkdir /storagebox-$username
+    mount -a
+}
+
 action=""
 
 while [[ $action != x ]]
@@ -72,6 +89,7 @@ do
     echo "[5] Install LAMP stack (apache2, mariadb, php, adminer)"
     echo "[6] Install OpenJDK 11 JDK"
     echo "[7] Install mailcow (and also Docker)"
+    echo "[8] Mount a Hetzner Storage Box"
     echo "[x] Exit"
     echo ""
     action=$(ask "Select an action")
@@ -86,5 +104,6 @@ do
         5) install_lamp ;;
         6) install_openjdk_11 ;;
         7) install_mailcow ;;
+        8) mount_storagebox ;;
     esac
 done
